@@ -22,4 +22,5 @@
         <property name="favorParameter" value="true"/>
         <property name="ignoreAcceptHeader" value="false" />
     </bean>
+
 </beans>

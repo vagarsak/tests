@@ -1,7 +1,5 @@
 package ru.company.client;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -13,12 +11,12 @@ import org.fusesource.restygwt.client.MethodCallback;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import ru.company.shared.Answer;
-import ru.company.shared.Question;
-import ru.company.shared.Result;
+import ru.company.shared.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RestyGwtApp implements EntryPoint {
 
@@ -75,6 +73,7 @@ public class RestyGwtApp implements EntryPoint {
             @Override
             public void onClick(ClickEvent clickEvent) {
                 TextBox rbText  = new TextBox(); // ответ
+                rbText.setStyleName("form-control");
                 Button deleteRb = new Button("Удалить ответ");
                 final HorizontalPanel horizontalPanel = new HorizontalPanel();
                 if(type.equals("RadioButton")){
@@ -145,6 +144,8 @@ public class RestyGwtApp implements EntryPoint {
 
         Defaults.setServiceRoot(GWT.getHostPageBaseURL());
 
+
+
         RootPanel.get("center").add(codeLabel); // вспомогательная инфа
         final HorizontalPanel horizontalPanel = new HorizontalPanel();
         final VerticalPanel verticalPanel2 = new VerticalPanel();
@@ -172,36 +173,131 @@ public class RestyGwtApp implements EntryPoint {
         horizontalPanel.add(lb);
         RootPanel.get("left").add(horizontalPanel); // выбор типа вопроса
         RootPanel.get("left").add(verticalPanel2);  // создание вопроса
+
+
         final Button getQuestion = new Button("Получить все вопросы");
         RootPanel.get("center").add(getQuestion);
-        final VerticalPanel verticalPanel = new VerticalPanel();
+        final VerticalPanel verticalPanel = new VerticalPanel(); // вопросы отображаются здесь
+
+        final Button getTest = new Button("Пройти тест");
+        RootPanel.get("center").add(getTest);
         RootPanel.get("center").add(verticalPanel);
-        final Button getResults = new Button("Получить результаты");
-        RootPanel.get("right").add(getResults);
-        final VerticalPanel verticalPanelResults = new VerticalPanel();
-        RootPanel.get("right").add(verticalPanelResults);
-        getResults.addClickHandler(new ClickHandler() {  // получить все результаты
+
+        getTest.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent clickEvent) {   // получить результаты тестов
-                addQestion.getAllResults(new MethodCallback<List<Result>>() {
+            public void onClick(ClickEvent clickEvent) {
+                addQestion.getTest(new MethodCallback<Test>() {
                     @Override
                     public void onFailure(Method method, Throwable throwable) {
                         codeLabel.setText("Ошибка getResults.addClickHandler");
                     }
+
                     @Override
-                    public void onSuccess(Method method,List<Result> ResultList) {
-                        verticalPanelResults.clear();
-                        for (Result result : ResultList) {
-                            String resultText =  result.getId() + " всего = " +
-                                                 result.getQuantity() + " удачных = " +
-                                                 result.getSuccessful();
-                            final Label resulLabel = new Label(resultText);
-                            verticalPanelResults.add(resulLabel);
+                    public void onSuccess(Method method, final Test test) {
+                        verticalPanel.clear();
+                        final Map<Integer,String[]> mapAnswer = new HashMap<>();
+                        for (Question vopro : test.getListQuestion()) {
+                            final Integer id = vopro.getId(); // id
+                            final Label questionId = new Label("id вопроса - " + id.toString() );  // id
+                            Label questionText = new Label("Вопрос: " + vopro.getQuestion()); // вопрос
+
+                            final ArrayList arrayListAnswer = new ArrayList(); // Выбранные ответы
+                            HorizontalPanel horizontalPanel1Answer = new HorizontalPanel();
+                            if(vopro.getType() == 1 || vopro.getType() == 2) {
+                                for (String s : vopro.getChoicesAnswer()) {  // варианты ответа
+                                    final Label answerLabel = new Label(s); // ответ
+                                    HorizontalPanel horizontalPanel12 = new HorizontalPanel();
+                                    if(vopro.getType() == 1){
+                                        final RadioButton rb = new RadioButton("myRadioGroup" + id);
+                                        horizontalPanel12.add(rb);
+                                        rb.addClickHandler(new ClickHandler() {
+                                            @Override
+                                            public void onClick(ClickEvent clickEvent) {
+                                                if(rb.getValue()){
+                                                    arrayListAnswer.clear();
+                                                    arrayListAnswer.add(answerLabel.getText());
+                                                    mapAnswer.put(id,(String[]) arrayListAnswer.toArray(new String[arrayListAnswer.size()]));
+                                                }
+                                            }
+                                        });
+                                    }else{
+                                        final CheckBox rb = new CheckBox();
+                                        horizontalPanel12.add(rb);
+                                        rb.addClickHandler(new ClickHandler() {
+                                            @Override
+                                            public void onClick(ClickEvent clickEvent) {
+                                                String text = answerLabel.getText();
+                                                Integer index = arrayListAnswer.indexOf(text);
+                                                if(rb.getValue()){
+                                                    if(index == -1){
+                                                        arrayListAnswer.add(answerLabel.getText());
+                                                        mapAnswer.put(id,(String[]) arrayListAnswer.toArray(new String[arrayListAnswer.size()]));
+                                                    }
+                                                }else{
+                                                    arrayListAnswer.remove(text);
+                                                    mapAnswer.put(id,(String[]) arrayListAnswer.toArray(new String[arrayListAnswer.size()]));
+                                                }
+
+                                            }
+                                        });
+                                    }
+                                    horizontalPanel12.add(answerLabel);
+                                    horizontalPanel1Answer.add(horizontalPanel12);
+                                }
+                            }
+
+                            if(vopro.getType() == 0){
+                                final TextBox answerText = new TextBox(); // сам ответ
+                                horizontalPanel1Answer.add(answerText);
+                                answerText.addValueChangeHandler(new ValueChangeHandler<String>() {
+                                    @Override
+                                    public void onValueChange(ValueChangeEvent<String> valueChangeEvent) {
+                                        arrayListAnswer.clear();
+                                        arrayListAnswer.add(answerText.getText());
+                                        mapAnswer.put(id,(String[]) arrayListAnswer.toArray(new String[arrayListAnswer.size()]));
+                                    }
+                                });
+                            }
+
+                            verticalPanel.add(questionId);
+                            verticalPanel.add(questionText);
+                            verticalPanel.add(horizontalPanel1Answer);
                         }
+
+                        Button getAnswer = new Button("Ответить"); // отправить ответ
+                        verticalPanel.add(getAnswer);
+
+                        getAnswer.addClickHandler(new ClickHandler() {
+                            @Override
+                            public void onClick(ClickEvent clickEvent) {
+                                AnswerTest answerTest = new AnswerTest();
+                                answerTest.setId(test.getId());
+                                answerTest.setMapAnswer(mapAnswer);
+                                addQestion.sendTest(answerTest, new MethodCallback<TestResult>() {
+                                    @Override
+                                    public void onFailure(Method method, Throwable throwable) {
+                                        codeLabel.setText("что то пошло не так getAnswer.addClickHandler");
+                                    }
+                                    @Override
+                                    public void onSuccess(Method method, TestResult testResult) {
+                                        codeLabel.setText("");
+                                        for (Map.Entry<Integer, Integer> entry :  testResult.getMapAnswer().entrySet()) {
+                                            codeLabel.setText(codeLabel.getText() + entry.getValue() + " ");
+                                        }
+                                    }
+                                });
+                            }
+                        });
                     }
                 });
             }
         });
+
+        final Button getResults = new Button("Получить результаты");
+        RootPanel.get("right").add(getResults);
+        final VerticalPanel verticalPanelResults = new VerticalPanel();
+        RootPanel.get("right").add(verticalPanelResults);
+        getResults.addClickHandler(new ViewResults(addQestion,verticalPanelResults));  // получить все результаты
 
 
         class MyHandlerGetQuestion implements ClickHandler { // кнопка получить все вопросы
@@ -214,91 +310,100 @@ public class RestyGwtApp implements EntryPoint {
 
                    @Override
                    public void onSuccess(Method method, List<Question> question) {
-                       verticalPanel.clear();
-                       for (Question vopro : question) {
-                           final Integer id = vopro.getId(); // id
-                           final Label questionId = new Label("id вопроса - " + id.toString() );  // id
-                           Label questionText = new Label("Вопрос: " + vopro.getQuestion()); // вопрос
-
-                           final ArrayList arrayListAnswer = new ArrayList(); // Выбранные ответы
-                           HorizontalPanel horizontalPanel1Answer = new HorizontalPanel();
-                           if(vopro.getType() == 1 || vopro.getType() == 2) {
-                               for (String s : vopro.getChoicesAnswer()) {  // варианты ответа
-                                   final Label answerLabel = new Label(s); // ответ
-                                   HorizontalPanel horizontalPanel12 = new HorizontalPanel();
-                                   if(vopro.getType() == 1){
-                                       final RadioButton rb = new RadioButton("myRadioGroup" + id);
-                                       horizontalPanel12.add(rb);
-                                       rb.addClickHandler(new ClickHandler() {
-                                           @Override
-                                           public void onClick(ClickEvent clickEvent) {
-                                               if(rb.getValue()){
-                                                   arrayListAnswer.clear();
-                                                   arrayListAnswer.add(answerLabel.getText());
-                                               }
-                                           }
-                                       });
-                                   }else{
-                                       final CheckBox rb = new CheckBox();
-                                       horizontalPanel12.add(rb);
-                                       rb.addClickHandler(new ClickHandler() {
-                                           @Override
-                                           public void onClick(ClickEvent clickEvent) {
-                                               if(rb.getValue()){
-                                                   arrayListAnswer.add(answerLabel.getText());
-                                               }
-                                           }
-                                       });
-                                   }
-                                   horizontalPanel12.add(answerLabel);
-                                   horizontalPanel1Answer.add(horizontalPanel12);
-                               }
-                           }
-
-                           if(vopro.getType() == 0){
-                               final TextBox answerText = new TextBox(); // сам ответ
-                               horizontalPanel1Answer.add(answerText);
-                               answerText.addValueChangeHandler(new ValueChangeHandler<String>() {
-                                   @Override
-                                   public void onValueChange(ValueChangeEvent<String> valueChangeEvent) {
-                                       arrayListAnswer.clear();
-                                       arrayListAnswer.add(answerText.getText());
-                                   }
-                               });
-                           }
-
-                           Button getAnswer = new Button("Ответить"); // отправить ответ
-                           verticalPanel.add(questionId);
-                           verticalPanel.add(questionText);
-                           verticalPanel.add(horizontalPanel1Answer);
-                           verticalPanel.add(getAnswer);
-                           
-                           getAnswer.addClickHandler(new ClickHandler() {
-                               @Override
-                               public void onClick(ClickEvent clickEvent) {
-                                   Answer answer = new Answer();
-                                   answer.setId(id);
-                                   answer.setAnswer((String[]) arrayListAnswer.toArray(new String[arrayListAnswer.size()]));
-                                   addQestion.getAnswer(answer, new MethodCallback<String>() {
-                                       @Override
-                                       public void onFailure(Method method, Throwable throwable) {
-                                           codeLabel.setText("что то пошло не так getAnswer.addClickHandler");
-                                       }
-                                       @Override
-                                       public void onSuccess(Method method, String s) {
-                                           codeLabel.setText("Ответ успешно принят - " + s);
-                                       }
-                                   });
-                               }
-                           });
-
-                       }
+                       viewQuestion(question);
                    }
                });
+            }
+
+
+            private void viewQuestion(List<Question> question){
+                verticalPanel.clear();
+                for (Question vopro : question) {
+                    final Integer id = vopro.getId(); // id
+                    final Label questionId = new Label("id вопроса - " + id.toString() );  // id
+                    Label questionText = new Label("Вопрос: " + vopro.getQuestion()); // вопрос
+
+                    final ArrayList arrayListAnswer = new ArrayList(); // Выбранные ответы
+                    HorizontalPanel horizontalPanel1Answer = new HorizontalPanel();
+                    if(vopro.getType() == 1 || vopro.getType() == 2) {
+                        for (String s : vopro.getChoicesAnswer()) {  // варианты ответа
+                            final Label answerLabel = new Label(s); // ответ
+                            HorizontalPanel horizontalPanel12 = new HorizontalPanel();
+                            if(vopro.getType() == 1){
+                                final RadioButton rb = new RadioButton("myRadioGroup" + id);
+                                horizontalPanel12.add(rb);
+                                rb.addClickHandler(new ClickHandler() {
+                                    @Override
+                                    public void onClick(ClickEvent clickEvent) {
+                                        if(rb.getValue()){
+                                            arrayListAnswer.clear();
+                                            arrayListAnswer.add(answerLabel.getText());
+                                        }
+                                    }
+                                });
+                            }else{
+                                final CheckBox rb = new CheckBox();
+                                horizontalPanel12.add(rb);
+                                rb.addClickHandler(new ClickHandler() {
+                                    @Override
+                                    public void onClick(ClickEvent clickEvent) {
+                                        String text = answerLabel.getText();
+                                        Integer index = arrayListAnswer.indexOf(text);
+                                        if(rb.getValue()){
+                                            if(index == -1){
+                                                arrayListAnswer.add(text);
+                                            }
+                                        }else{
+                                                arrayListAnswer.remove(text);
+                                        }
+                                    }
+                                });
+                            }
+                            horizontalPanel12.add(answerLabel);
+                            horizontalPanel1Answer.add(horizontalPanel12);
+                        }
+                    }
+
+                    if(vopro.getType() == 0){
+                        final TextBox answerText = new TextBox(); // сам ответ
+                        horizontalPanel1Answer.add(answerText);
+                        answerText.addValueChangeHandler(new ValueChangeHandler<String>() {
+                            @Override
+                            public void onValueChange(ValueChangeEvent<String> valueChangeEvent) {
+                                arrayListAnswer.clear();
+                                arrayListAnswer.add(answerText.getText());
+                            }
+                        });
+                    }
+
+                    Button getAnswer = new Button("Ответить"); // отправить ответ
+                    verticalPanel.add(questionId);
+                    verticalPanel.add(questionText);
+                    verticalPanel.add(horizontalPanel1Answer);
+                    verticalPanel.add(getAnswer);
+
+                    getAnswer.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent clickEvent) {
+                            Answer answer = new Answer();
+                            answer.setId(id);
+                            answer.setAnswer((String[]) arrayListAnswer.toArray(new String[arrayListAnswer.size()]));
+                            addQestion.getAnswer(answer, new MethodCallback<String>() {
+                                @Override
+                                public void onFailure(Method method, Throwable throwable) {
+                                    codeLabel.setText("что то пошло не так getAnswer.addClickHandler");
+                                }
+                                @Override
+                                public void onSuccess(Method method, String s) {
+                                    codeLabel.setText("Ответ успешно принят - " + s);
+                                }
+                            });
+                        }
+                    });
+                }
             }
         }
         MyHandlerGetQuestion handler2 = new MyHandlerGetQuestion();
         getQuestion.addClickHandler(handler2);
-
     }
 }
