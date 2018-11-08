@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
-import ru.company.shared.Result;
+import ru.company.shared.ResultView;
 
 import java.util.List;
 
@@ -21,21 +21,23 @@ public class ViewResults implements ClickHandler {
 
     @Override
     public void onClick(ClickEvent clickEvent) {   // получить результаты тестов
-            addQestion.getAllResults(new MethodCallback<List<Result>>() {
-                @Override
-                public void onFailure(Method method, Throwable throwable) {
+        addQestion.getAllResults(new MethodCallback<List<ResultView>>() {
+            @Override
+            public void onFailure(Method method, Throwable throwable) {
+            }
+
+            @Override
+            public void onSuccess(Method method, List<ResultView> ResultList) {
+                verticalPanelResults.clear();
+                for (ResultView result : ResultList) {
+                    String resultText = result.getId() + " " +
+                            result.getQuestion() + " всего = " +
+                            result.getAnswers().get("quantity") + " удачных = " +
+                            result.getAnswers().get("successful");
+                    final Label resulLabel = new Label(resultText);
+                    verticalPanelResults.add(resulLabel);
                 }
-                @Override
-                public void onSuccess(Method method,List<Result> ResultList) {
-                    verticalPanelResults.clear();
-                    for (Result result : ResultList) {
-                        String resultText =  result.getId() + " всего = " +
-                                result.getQuantity() + " удачных = " +
-                                result.getSuccessful();
-                        final Label resulLabel = new Label(resultText);
-                        verticalPanelResults.add(resulLabel);
-                    }
-                }
-            });
+            }
+        });
     }
 }

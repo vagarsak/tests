@@ -1,8 +1,10 @@
 package ru.company.shared;
 
+import java.util.List;
+
 public class Answer {
     private Integer id; // ид вопроса
-    private String[] answer; // ответ
+    private List<String> answer; // ответ
 
     public Integer getId() {
         return id;
@@ -12,11 +14,11 @@ public class Answer {
         this.id = id;
     }
 
-    public String[] getAnswer() {
+    public List<String> getAnswer() {
         return answer;
     }
 
-    public void setAnswer(String[] answer) {
+    public void setAnswer(List<String> answer) {
         this.answer = answer;
     }
 }

@@ -14,87 +14,100 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class HelloResource {
 
     List<Question> database; // база вопросов
-    List<Result> results;   // результаты
-    Test test; // тест
+    List<Question> test; // тест
+
     public HelloResource() {
         database = new ArrayList<>();
-        results = new ArrayList<>();
     }
 
     @RequestMapping(value = "/add/question", method = RequestMethod.POST)
-    public String getPostHello(@RequestBody Question question) { // добавить вопрос
+    public Boolean getPostHello(@RequestBody QuestionView questionView) { // добавить вопрос
+        Question question = new Question();
         question.setId(database.size());
+        question.setType(questionView.getType());
+        question.setQuestion(questionView.getQuestion());
+        question.setAnswer(questionView.getAnswer());
+        question.setChoicesAnswer(questionView.getChoicesAnswer());
         database.add(question);
-        results.add(new Result(question.getId()));
-        return "1";
+        return true;
     }
 
-    @RequestMapping(value = "/add/question", method = RequestMethod.GET)
-    public List<Question> getAllQuestion() { // получить все вопросы
-        return database;
+    @RequestMapping(value = "/all/question", method = RequestMethod.GET)
+    public List<QuestionView> getAllQuestion() { // получить все вопросы
+        return questionToQuestionView(database);
     }
 
     @RequestMapping(value = "/question", method = RequestMethod.POST)
-    public String getPostHello(@RequestBody Answer answer) { // принять ответ на тест
-        for(int i =0; i < database.size();i++){
-            if (database.get(i).getId() ==  answer.getId() ){ //нашли тест
-                Integer rez = database.get(i).checkAnswer(answer.getAnswer());
-                switch (rez){
-                    case (1):
-                        results.get(answer.getId()).addSuccessful();
-                        return "1";
-                    case (0):
-                        results.get(answer.getId()).addQuantity();
+    public Boolean getPostHello(@RequestBody Answer answer) { // принять ответ на вопрос
+        for (int i = 0; i < database.size(); i++) {
+            if (database.get(i).getId() == answer.getId()) { //нашли вопрос
+                if (database.get(i).checkAnswer(answer.getAnswer())) {
+                    return true;
                 }
                 break;
             }
         }
-        return "0";
+        return false;
     }
 
     @RequestMapping(value = "/results", method = RequestMethod.GET)
-    public List<Result> getAllResults() { // получить все результаты
+    public List<ResultView> getAllResults() { // получить все результаты
+        List<ResultView> results = new ArrayList<>();
+        for (int i = 0; i < database.size(); i++) {
+            results.add(new ResultView(database.get(i).getId(),
+                    database.get(i).getQuestion(), database.get(i).getResult()));
+        }
         return results;
     }
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public Test getTest() { // получить тест из двух вопросов
+    public TestView getTest() { // получить тест из двух вопросов
         List<Question> question;
-        if(database.size() > 2){
+        if (database.size() > 2) {
             Collections.shuffle(database);
             question = database.subList(0, 2);
-        }else{
+        } else {
             question = database;
         }
-        test = new Test();
-        test.setId(1);
-        test.setListQuestion(question.toArray(new Question[question.size()]));
-        return test;
+        test = question;
+        TestView testView = new TestView(1, questionToQuestionView(question));
+        return testView;
     }
 
     @RequestMapping(value = "/test", method = RequestMethod.POST)
-    public TestResult getAnswerToTest(@RequestBody AnswerTest answerTest) { // получить тест
-        Map<Integer,Integer> mapAnswer = new HashMap<>();
-        for (Map.Entry<Integer, String[]> entry : answerTest.getMapAnswer().entrySet()) {
-            mapAnswer.put(entry.getKey(),0); // ответ не правильный изначально
-            for(int i =0; i < database.size();i++){
-                if (database.get(i).getId() ==  entry.getKey() ){ //нашли вопрос
-                    Integer rez = database.get(i).checkAnswer(entry.getValue());
-                    switch (rez){
-                        case (1):
-                            results.get(entry.getKey()).addSuccessful();
-                            mapAnswer.put(entry.getKey(),1);
-                            break;
-                        case (0):
-                            results.get(entry.getKey()).addQuantity();
-                    }
-                    break;
+    public TestResultView getAnswerToTest(@RequestBody AnswerTest answerTest) { // принять ответ на тест
+        Map<Integer, Boolean> mapAnswer = new HashMap<>();
+        Boolean testItogResult = true;
+        for (int i = 0; i < test.size(); i++) {
+            Question question = test.get(i);
+            mapAnswer.put(question.getId(), false); // ответ не правильный изначально
+            if (answerTest.getMapAnswer().containsKey(question.getId())) {
+                if (question.checkAnswer(answerTest.getMapAnswer().get(question.getId()))) {
+                    mapAnswer.put(question.getId(), true);
+                } else {
+                    testItogResult = false;
                 }
+            } else {
+                testItogResult = false;
             }
         }
-        TestResult testResult = new TestResult();
+        TestResultView testResult = new TestResultView();
         testResult.setId(answerTest.getId());
         testResult.setMapAnswer(mapAnswer);
+        testResult.setResult(testItogResult);
         return testResult;
+    }
+
+    private List<QuestionView> questionToQuestionView(List<Question> question) {
+        List<QuestionView> questionViewList = new ArrayList<>();
+        for (int i = 0; i < question.size(); i++) {
+            QuestionView questionView = new QuestionView();
+            questionView.setType(question.get(i).getType());
+            questionView.setId(question.get(i).getId());
+            questionView.setQuestion(question.get(i).getQuestion());
+            questionView.setChoicesAnswer(question.get(i).getChoicesAnswer());
+            questionViewList.add(questionView);
+        }
+        return questionViewList;
     }
 }

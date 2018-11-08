@@ -18,12 +18,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class RestyGwtApp implements EntryPoint {
 
     final Label codeLabel = new Label(); // убрать отсюда позже
     final AddQuestion addQestion = GWT.create(AddQuestion.class);
 
-    private void answerText(VerticalPanel verticalPanel){
+    private void answerText(VerticalPanel verticalPanel) {
         final Button creatQuestion = new Button("Создать вопрос");
         final TextBox questionText = new TextBox(); // сам вопрос
         final Label questionLabel = new Label("Вопрос");
@@ -44,8 +45,9 @@ public class RestyGwtApp implements EntryPoint {
         creatQuestion.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                Question question = new Question();
-                String[] answerList = {answer.getText()};
+                QuestionView question = new QuestionView();
+                List<String> answerList = new ArrayList<>();
+                answerList.add(answer.getText());
                 question.setAnswer(answerList);
                 question.setQuestion(questionText.getText());
                 question.setType(0);
@@ -54,7 +56,7 @@ public class RestyGwtApp implements EntryPoint {
         });
     }
 
-    private void answerMultiple(final VerticalPanel verticalPanel, final String type){
+    private void answerMultiple(final VerticalPanel verticalPanel, final String type) {
         final Button creatQuestion = new Button("Создать вопрос");
         final TextBox questionText = new TextBox(); // сам вопрос
         final Label questionLabel = new Label("Вопрос");
@@ -68,19 +70,18 @@ public class RestyGwtApp implements EntryPoint {
 
 
         final Button addAnswer = new Button("Добавить ответ");
-        final ArrayList<HorizontalPanel> hh = new ArrayList<>();
+        final List<HorizontalPanel> hh = new ArrayList<>();
         addAnswer.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                TextBox rbText  = new TextBox(); // ответ
-                rbText.setStyleName("form-control");
+                TextBox rbText = new TextBox(); // ответ
                 Button deleteRb = new Button("Удалить ответ");
                 final HorizontalPanel horizontalPanel = new HorizontalPanel();
-                if(type.equals("RadioButton")){
+                if (type.equals("RadioButton")) {
                     RadioButton rb = new RadioButton("myRadioGroup");
                     rb.setChecked(true);
                     horizontalPanel.add(rb);
-                }else{
+                } else {
                     CheckBox rb = new CheckBox();
                     horizontalPanel.add(rb);
                 }
@@ -109,26 +110,26 @@ public class RestyGwtApp implements EntryPoint {
                 List answerList = new ArrayList();
                 for (HorizontalPanel horizontalPanel : hh) {
                     TextBox textBox = (TextBox) horizontalPanel.getWidget(1);
-                    if(type.equals("RadioButton")){
+                    if (type.equals("RadioButton")) {
                         RadioButton lb = (RadioButton) horizontalPanel.getWidget(0);
-                        if (lb.getValue()){ // правильный ответ
+                        if (lb.getValue()) { // правильный ответ
                             answerList.add(textBox.getText());
                         }
-                    }else{
+                    } else {
                         CheckBox lb = (CheckBox) horizontalPanel.getWidget(0);
-                        if (lb.getValue()){ // правильный ответ
+                        if (lb.getValue()) { // правильный ответ
                             answerList.add(textBox.getText());
                         }
                     }
                     choicesAnswer.add(textBox.getText());// все ответы
                 }
-                Question question = new Question();
-                question.setAnswer((String[]) answerList.toArray(new String[answerList.size()]));
-                question.setChoicesAnswer((String[]) choicesAnswer.toArray(new String[choicesAnswer.size()]));
+                QuestionView question = new QuestionView();
+                question.setAnswer(answerList);
+                question.setChoicesAnswer(choicesAnswer);
                 question.setQuestion(questionText.getText());
-                if(type.equals("RadioButton")){
+                if (type.equals("RadioButton")) {
                     question.setType(1);
-                }else{
+                } else {
                     question.setType(2);
                 }
                 addQestion.getPostHellos(question, new СreateQuestion(codeLabel));// отправляем на сервер
@@ -144,8 +145,6 @@ public class RestyGwtApp implements EntryPoint {
 
         Defaults.setServiceRoot(GWT.getHostPageBaseURL());
 
-
-
         RootPanel.get("center").add(codeLabel); // вспомогательная инфа
         final HorizontalPanel horizontalPanel = new HorizontalPanel();
         final VerticalPanel verticalPanel2 = new VerticalPanel();
@@ -158,11 +157,13 @@ public class RestyGwtApp implements EntryPoint {
             @Override
             public void onChange(ChangeEvent event) {
                 verticalPanel2.clear();
-                switch (lb.getSelectedIndex()){
+                switch (lb.getSelectedIndex()) {
                     case 1:
-                        answerMultiple(verticalPanel2,"RadioButton"); break;
+                        answerMultiple(verticalPanel2, "RadioButton");
+                        break;
                     case 2:
-                        answerMultiple(verticalPanel2,"CheckBox"); break;
+                        answerMultiple(verticalPanel2, "CheckBox");
+                        break;
                     default:
                         answerText(verticalPanel2);
                 }
@@ -186,58 +187,57 @@ public class RestyGwtApp implements EntryPoint {
         getTest.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                addQestion.getTest(new MethodCallback<Test>() {
+                addQestion.getTest(new MethodCallback<TestView>() {
                     @Override
                     public void onFailure(Method method, Throwable throwable) {
                         codeLabel.setText("Ошибка getResults.addClickHandler");
                     }
 
                     @Override
-                    public void onSuccess(Method method, final Test test) {
+                    public void onSuccess(Method method, final TestView test) {
                         verticalPanel.clear();
-                        final Map<Integer,String[]> mapAnswer = new HashMap<>();
-                        for (Question vopro : test.getListQuestion()) {
+                        final Map<Integer, List<String>> mapAnswer = new HashMap<>();
+                        for (QuestionView vopro : test.getListQuestion()) {
                             final Integer id = vopro.getId(); // id
-                            final Label questionId = new Label("id вопроса - " + id.toString() );  // id
+                            final Label questionId = new Label("id вопроса - " + id.toString());  // id
                             Label questionText = new Label("Вопрос: " + vopro.getQuestion()); // вопрос
 
-                            final ArrayList arrayListAnswer = new ArrayList(); // Выбранные ответы
+                            final List<String> listAnswer = new ArrayList(); // Выбранные ответы
                             HorizontalPanel horizontalPanel1Answer = new HorizontalPanel();
-                            if(vopro.getType() == 1 || vopro.getType() == 2) {
+                            if (vopro.getType() == 1 || vopro.getType() == 2) {
                                 for (String s : vopro.getChoicesAnswer()) {  // варианты ответа
                                     final Label answerLabel = new Label(s); // ответ
                                     HorizontalPanel horizontalPanel12 = new HorizontalPanel();
-                                    if(vopro.getType() == 1){
+                                    if (vopro.getType() == 1) {
                                         final RadioButton rb = new RadioButton("myRadioGroup" + id);
                                         horizontalPanel12.add(rb);
                                         rb.addClickHandler(new ClickHandler() {
                                             @Override
                                             public void onClick(ClickEvent clickEvent) {
-                                                if(rb.getValue()){
-                                                    arrayListAnswer.clear();
-                                                    arrayListAnswer.add(answerLabel.getText());
-                                                    mapAnswer.put(id,(String[]) arrayListAnswer.toArray(new String[arrayListAnswer.size()]));
+                                                if (rb.getValue()) {
+                                                    listAnswer.clear();
+                                                    listAnswer.add(answerLabel.getText());
+                                                    mapAnswer.put(id, listAnswer);
                                                 }
                                             }
                                         });
-                                    }else{
+                                    } else {
                                         final CheckBox rb = new CheckBox();
                                         horizontalPanel12.add(rb);
                                         rb.addClickHandler(new ClickHandler() {
                                             @Override
                                             public void onClick(ClickEvent clickEvent) {
                                                 String text = answerLabel.getText();
-                                                Integer index = arrayListAnswer.indexOf(text);
-                                                if(rb.getValue()){
-                                                    if(index == -1){
-                                                        arrayListAnswer.add(answerLabel.getText());
-                                                        mapAnswer.put(id,(String[]) arrayListAnswer.toArray(new String[arrayListAnswer.size()]));
+                                                Integer index = listAnswer.indexOf(text);
+                                                if (rb.getValue()) {
+                                                    if (index == -1) {
+                                                        listAnswer.add(answerLabel.getText());
+                                                        mapAnswer.put(id, listAnswer);
                                                     }
-                                                }else{
-                                                    arrayListAnswer.remove(text);
-                                                    mapAnswer.put(id,(String[]) arrayListAnswer.toArray(new String[arrayListAnswer.size()]));
+                                                } else {
+                                                    listAnswer.remove(text);
+                                                    mapAnswer.put(id, listAnswer);
                                                 }
-
                                             }
                                         });
                                     }
@@ -246,15 +246,15 @@ public class RestyGwtApp implements EntryPoint {
                                 }
                             }
 
-                            if(vopro.getType() == 0){
+                            if (vopro.getType() == 0) {
                                 final TextBox answerText = new TextBox(); // сам ответ
                                 horizontalPanel1Answer.add(answerText);
                                 answerText.addValueChangeHandler(new ValueChangeHandler<String>() {
                                     @Override
                                     public void onValueChange(ValueChangeEvent<String> valueChangeEvent) {
-                                        arrayListAnswer.clear();
-                                        arrayListAnswer.add(answerText.getText());
-                                        mapAnswer.put(id,(String[]) arrayListAnswer.toArray(new String[arrayListAnswer.size()]));
+                                        listAnswer.clear();
+                                        listAnswer.add(answerText.getText());
+                                        mapAnswer.put(id, listAnswer);
                                     }
                                 });
                             }
@@ -273,15 +273,20 @@ public class RestyGwtApp implements EntryPoint {
                                 AnswerTest answerTest = new AnswerTest();
                                 answerTest.setId(test.getId());
                                 answerTest.setMapAnswer(mapAnswer);
-                                addQestion.sendTest(answerTest, new MethodCallback<TestResult>() {
+                                addQestion.sendTest(answerTest, new MethodCallback<TestResultView>() {
                                     @Override
                                     public void onFailure(Method method, Throwable throwable) {
                                         codeLabel.setText("что то пошло не так getAnswer.addClickHandler");
                                     }
+
                                     @Override
-                                    public void onSuccess(Method method, TestResult testResult) {
-                                        codeLabel.setText("");
-                                        for (Map.Entry<Integer, Integer> entry :  testResult.getMapAnswer().entrySet()) {
+                                    public void onSuccess(Method method, TestResultView testResult) {
+                                        if (testResult.getResult()) {
+                                            codeLabel.setText("Тест пройден ");
+                                        } else {
+                                            codeLabel.setText("Тест провален ");
+                                        }
+                                        for (Map.Entry<Integer, Boolean> entry : testResult.getMapAnswer().entrySet()) {
                                             codeLabel.setText(codeLabel.getText() + entry.getValue() + " ");
                                         }
                                     }
@@ -297,64 +302,62 @@ public class RestyGwtApp implements EntryPoint {
         RootPanel.get("right").add(getResults);
         final VerticalPanel verticalPanelResults = new VerticalPanel();
         RootPanel.get("right").add(verticalPanelResults);
-        getResults.addClickHandler(new ViewResults(addQestion,verticalPanelResults));  // получить все результаты
-
+        getResults.addClickHandler(new ViewResults(addQestion, verticalPanelResults));  // получить все результаты
 
         class MyHandlerGetQuestion implements ClickHandler { // кнопка получить все вопросы
             public void onClick(ClickEvent event) {
-               addQestion.getAllQuestion(new MethodCallback<List<Question>>() {
-                   @Override
-                   public void onFailure(Method method, Throwable throwable) {
-                       codeLabel.setText("Error MyHandlerGetQuestion");
-                   }
+                addQestion.getAllQuestion(new MethodCallback<List<QuestionView>>() {
+                    @Override
+                    public void onFailure(Method method, Throwable throwable) {
+                        codeLabel.setText("Error MyHandlerGetQuestion");
+                    }
 
-                   @Override
-                   public void onSuccess(Method method, List<Question> question) {
-                       viewQuestion(question);
-                   }
-               });
+                    @Override
+                    public void onSuccess(Method method, List<QuestionView> question) {
+                        viewQuestion(question);
+                    }
+                });
             }
 
-
-            private void viewQuestion(List<Question> question){
+            private void viewQuestion(List<QuestionView> question) {
                 verticalPanel.clear();
-                for (Question vopro : question) {
+                for (QuestionView vopro : question) {
                     final Integer id = vopro.getId(); // id
-                    final Label questionId = new Label("id вопроса - " + id.toString() );  // id
+                    final Label questionId = new Label("id вопроса - " + id.toString());  // id
                     Label questionText = new Label("Вопрос: " + vopro.getQuestion()); // вопрос
 
-                    final ArrayList arrayListAnswer = new ArrayList(); // Выбранные ответы
+                    final List<String> listAnswer = new ArrayList(); // Выбранные ответы
                     HorizontalPanel horizontalPanel1Answer = new HorizontalPanel();
-                    if(vopro.getType() == 1 || vopro.getType() == 2) {
+                    if (vopro.getType() == 1 || vopro.getType() == 2) {
                         for (String s : vopro.getChoicesAnswer()) {  // варианты ответа
                             final Label answerLabel = new Label(s); // ответ
                             HorizontalPanel horizontalPanel12 = new HorizontalPanel();
-                            if(vopro.getType() == 1){
+                            if (vopro.getType() == 1) {
                                 final RadioButton rb = new RadioButton("myRadioGroup" + id);
                                 horizontalPanel12.add(rb);
                                 rb.addClickHandler(new ClickHandler() {
                                     @Override
                                     public void onClick(ClickEvent clickEvent) {
-                                        if(rb.getValue()){
-                                            arrayListAnswer.clear();
-                                            arrayListAnswer.add(answerLabel.getText());
+                                        if (rb.getValue()) {
+                                            listAnswer.clear();
+                                            listAnswer.add(answerLabel.getText());
                                         }
                                     }
                                 });
-                            }else{
+                            } else {
                                 final CheckBox rb = new CheckBox();
                                 horizontalPanel12.add(rb);
                                 rb.addClickHandler(new ClickHandler() {
                                     @Override
                                     public void onClick(ClickEvent clickEvent) {
                                         String text = answerLabel.getText();
-                                        Integer index = arrayListAnswer.indexOf(text);
-                                        if(rb.getValue()){
-                                            if(index == -1){
-                                                arrayListAnswer.add(text);
+                                        Integer index = listAnswer.indexOf(text);
+                                        if (rb.getValue()) {
+                                            if (index == -1) {
+                                                listAnswer.add(text);
                                             }
-                                        }else{
-                                                arrayListAnswer.remove(text);
+                                        } else {
+                                            listAnswer.remove(text);
                                         }
                                     }
                                 });
@@ -364,14 +367,14 @@ public class RestyGwtApp implements EntryPoint {
                         }
                     }
 
-                    if(vopro.getType() == 0){
+                    if (vopro.getType() == 0) {
                         final TextBox answerText = new TextBox(); // сам ответ
                         horizontalPanel1Answer.add(answerText);
                         answerText.addValueChangeHandler(new ValueChangeHandler<String>() {
                             @Override
                             public void onValueChange(ValueChangeEvent<String> valueChangeEvent) {
-                                arrayListAnswer.clear();
-                                arrayListAnswer.add(answerText.getText());
+                                listAnswer.clear();
+                                listAnswer.add(answerText.getText());
                             }
                         });
                     }
@@ -387,15 +390,20 @@ public class RestyGwtApp implements EntryPoint {
                         public void onClick(ClickEvent clickEvent) {
                             Answer answer = new Answer();
                             answer.setId(id);
-                            answer.setAnswer((String[]) arrayListAnswer.toArray(new String[arrayListAnswer.size()]));
-                            addQestion.getAnswer(answer, new MethodCallback<String>() {
+                            answer.setAnswer(listAnswer);
+                            addQestion.sendAnswer(answer, new MethodCallback<Boolean>() {
                                 @Override
                                 public void onFailure(Method method, Throwable throwable) {
                                     codeLabel.setText("что то пошло не так getAnswer.addClickHandler");
                                 }
+
                                 @Override
-                                public void onSuccess(Method method, String s) {
-                                    codeLabel.setText("Ответ успешно принят - " + s);
+                                public void onSuccess(Method method, Boolean s) {
+                                    if (s) {
+                                        codeLabel.setText("Ответ успешно принят");
+                                    } else {
+                                        codeLabel.setText("Ответ неверный");
+                                    }
                                 }
                             });
                         }
@@ -407,3 +415,5 @@ public class RestyGwtApp implements EntryPoint {
         getQuestion.addClickHandler(handler2);
     }
 }
+
+

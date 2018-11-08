@@ -5,7 +5,7 @@ import org.fusesource.restygwt.client.MethodCallback;
 
 import com.google.gwt.user.client.ui.*;
 
-public class СreateQuestion implements MethodCallback<String> {
+public class СreateQuestion implements MethodCallback<Boolean> {
 
     private Label codeLabel;
 
@@ -19,7 +19,7 @@ public class СreateQuestion implements MethodCallback<String> {
     }
 
     @Override
-    public void onSuccess(Method method, String s) {
+    public void onSuccess(Method method, Boolean s) {
         codeLabel.setText("Успешно создан вопрос");
     }
 }
