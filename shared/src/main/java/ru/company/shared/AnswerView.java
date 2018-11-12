@@ -2,7 +2,7 @@ package ru.company.shared;
 
 import java.util.List;
 
-public class Answer {
+public class AnswerView {
     private Integer id; // ид вопроса
     private List<String> answer; // ответ
 

@@ -3,7 +3,7 @@ package ru.company.shared;
 import java.util.List;
 import java.util.Map;
 
-public class AnswerTest {
+public class AnswerTestView {
     private Integer id;
     private Map<Integer, List<String>> mapAnswer;
 

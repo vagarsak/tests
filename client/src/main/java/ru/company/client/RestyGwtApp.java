@@ -270,10 +270,10 @@ public class RestyGwtApp implements EntryPoint {
                         getAnswer.addClickHandler(new ClickHandler() {
                             @Override
                             public void onClick(ClickEvent clickEvent) {
-                                AnswerTest answerTest = new AnswerTest();
-                                answerTest.setId(test.getId());
-                                answerTest.setMapAnswer(mapAnswer);
-                                addQestion.sendTest(answerTest, new MethodCallback<TestResultView>() {
+                                AnswerTestView answerTestView = new AnswerTestView();
+                                answerTestView.setId(test.getId());
+                                answerTestView.setMapAnswer(mapAnswer);
+                                addQestion.sendTest(answerTestView, new MethodCallback<TestResultView>() {
                                     @Override
                                     public void onFailure(Method method, Throwable throwable) {
                                         codeLabel.setText("что то пошло не так getAnswer.addClickHandler");
@@ -388,10 +388,10 @@ public class RestyGwtApp implements EntryPoint {
                     getAnswer.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent clickEvent) {
-                            Answer answer = new Answer();
-                            answer.setId(id);
-                            answer.setAnswer(listAnswer);
-                            addQestion.sendAnswer(answer, new MethodCallback<Boolean>() {
+                            AnswerView answerView = new AnswerView();
+                            answerView.setId(id);
+                            answerView.setAnswer(listAnswer);
+                            addQestion.sendAnswer(answerView, new MethodCallback<Boolean>() {
                                 @Override
                                 public void onFailure(Method method, Throwable throwable) {
                                     codeLabel.setText("что то пошло не так getAnswer.addClickHandler");

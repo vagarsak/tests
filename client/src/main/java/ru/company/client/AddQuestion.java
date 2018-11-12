@@ -24,7 +24,7 @@ public interface AddQuestion extends RestService {
 
     @POST
     @Path("/question")   // отправить ответ на вопрос
-    public void sendAnswer(Answer s, MethodCallback<Boolean> callback);
+    public void sendAnswer(AnswerView s, MethodCallback<Boolean> callback);
 
     @GET
     @Path("/results") // получить все результаты
@@ -36,6 +36,6 @@ public interface AddQuestion extends RestService {
 
     @POST
     @Path("/test") // отправить ответ на тест
-    public void sendTest(AnswerTest answerTest, MethodCallback<TestResultView> callback);
+    public void sendTest(AnswerTestView answerTest, MethodCallback<TestResultView> callback);
 
 }

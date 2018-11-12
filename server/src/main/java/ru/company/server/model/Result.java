@@ -1,8 +1,20 @@
-package ru.company.shared;
+package ru.company.server.model;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "result")
 public class Result {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+
+    @Column(name = "quantity")
     private Integer quantity;
+
+    @Column(name = "successful")
     private Integer successful;
 
     public Result() {
