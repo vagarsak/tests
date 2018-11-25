@@ -17,6 +17,7 @@
 
   <!-- Other module inherits                                      -->
   <inherits name='ru.company.shared' />
+  <inherits name='ru.company.server' />
   <!-- Specify the app entry point class.                         -->
   <entry-point class='ru.company.client.RestyGwtApp' />
 

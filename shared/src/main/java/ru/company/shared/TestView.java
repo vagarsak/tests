@@ -3,8 +3,10 @@ package ru.company.shared;
 import java.util.List;
 
 public class TestView {
-    private Integer id; // ид теста
-    private List<QuestionView> listQuestion; // вопросы
+
+    private Integer id;
+
+    private List<QuestionView> listQuestion;
 
     public TestView() {
     }

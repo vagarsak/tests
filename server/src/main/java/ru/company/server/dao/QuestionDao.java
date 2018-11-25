@@ -45,4 +45,12 @@ public interface QuestionDao {
      */
     Test getByIdTest(Integer id);
 
+    /**
+     * Получить все объекты Test
+     *
+     * @param user, role
+     * @return List
+     */
+    List<Test> getTestByNameUser(String user, String role);
+
 }

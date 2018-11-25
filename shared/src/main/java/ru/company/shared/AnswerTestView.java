@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 public class AnswerTestView {
+
     private Integer id;
+
     private Map<Integer, List<String>> mapAnswer;
 
     public Integer getId() {

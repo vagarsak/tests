@@ -3,11 +3,16 @@ package ru.company.shared;
 import java.util.List;
 
 public class QuestionView {
+
     private Integer id = null;
+
     private Integer type = null;
-    private String question; // сам вопрос
-    private List<String> answer; // ответ на вопрос правильный
-    private List<String> choicesAnswer; // все возможные ответы на вопрос
+
+    private String question;
+
+    private List<String> answer;
+
+    private List<String> choicesAnswer;
 
     public Integer getId() {
         return id;

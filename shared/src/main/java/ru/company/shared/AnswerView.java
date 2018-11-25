@@ -3,8 +3,10 @@ package ru.company.shared;
 import java.util.List;
 
 public class AnswerView {
-    private Integer id; // ид вопроса
-    private List<String> answer; // ответ
+
+    private Integer id;
+
+    private List<String> answer;
 
     public Integer getId() {
         return id;

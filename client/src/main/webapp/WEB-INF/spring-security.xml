@@ -1,0 +1,25 @@
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <http auto-config="true" >
+        <intercept-url pattern="/api/admin/**" access="hasRole('ROLE_ADMIN')" />
+        <intercept-url pattern="/**" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
+        <form-login default-target-url="/Hellogwt.html"/>
+        <csrf disabled="true"/>
+    </http>
+
+    <authentication-manager >
+        <authentication-provider user-service-ref="userDetailsServiceImp">
+        </authentication-provider>
+    </authentication-manager>
+
+    <jdbc:initialize-database data-source="dataSource" ignore-failures="DROPS">
+        <jdbc:script location="classpath:ru/company/schema.sql" />
+        <jdbc:script location="classpath:ru/company/data.sql" />
+    </jdbc:initialize-database>
+
+</beans:beans>

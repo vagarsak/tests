@@ -3,9 +3,12 @@ package ru.company.shared;
 import java.util.Map;
 
 public class ResultView {
-    private Integer id; // ид вопроса
-    private String question; // вопрос
-    private Map<String, Integer> answers; // ответы
+
+    private Integer id;
+
+    private String question;
+
+    private Map<String, Integer> answers;
 
     public ResultView() {
     }

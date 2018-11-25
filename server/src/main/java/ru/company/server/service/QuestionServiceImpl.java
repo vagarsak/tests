@@ -71,9 +71,9 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public TestResultView getTestAnswer(AnswerTestView answerTest) {
         Test test = dao.getByIdTest(answerTest.getId());
-        List<Question> listQuestion = test.getListQuestion();
+        List<Question> listQuestion = idToListQuestion(test.getListQuestionId());
         Map<Integer, Boolean> mapAnswer = new HashMap<>();
-        Boolean testItogResult = true;
+        test.setResult(true);
         for (int i = 0; i < listQuestion.size(); i++) {
             Question question = listQuestion.get(i);
             mapAnswer.put(question.getId(), false);
@@ -81,25 +81,51 @@ public class QuestionServiceImpl implements QuestionService {
                 if (question.checkAnswer(answerTest.getMapAnswer().get(question.getId()))) {
                     mapAnswer.put(question.getId(), true);
                 } else {
-                    testItogResult = false;
+                    test.setResult(false);
                 }
             } else {
-                testItogResult = false;
+                test.setResult(false);
             }
         }
-
-        TestResultView testResult = new TestResultView();
-        testResult.setId(answerTest.getId());
-        testResult.setMapAnswer(mapAnswer);
-        testResult.setResult(testItogResult);
-        return testResult;
+        return testResultToTestResultView(test,mapAnswer);
     }
+
+    @Override
+    public List<TestResultsView> getAllResultsTests(String user, String role) {
+        return testToTestResultsView(dao.getTestByNameUser(user, role));
+    }
+
+    private List<TestResultsView> testToTestResultsView(List<Test> tests) {
+        List<TestResultsView> testResultsViewList = new ArrayList<>();
+        for(Test test :tests){
+            TestResultsView testResultsView = new TestResultsView();
+            testResultsView.setId(test.getId());
+            testResultsView.setResult(test.getResult());
+            testResultsView.setNameUser(test.getNameUser());
+            List<String> questions = new ArrayList<>();
+            for(Question question :idToListQuestion(test.getListQuestionId())){
+                questions.add(question.getQuestion());
+            }
+            testResultsView.setQuestion(questions);
+            testResultsViewList.add(testResultsView);
+        }
+        return testResultsViewList;
+    }
+
 
     private TestView testToTestView(Test test) {
         TestView testView = new TestView();
         testView.setId(test.getId());
-        testView.setListQuestion(questionToQuestionView(test.getListQuestion()));
+        testView.setListQuestion(questionToQuestionView(idToListQuestion(test.getListQuestionId())));
         return testView;
+    }
+
+    private TestResultView testResultToTestResultView(Test test,Map<Integer, Boolean> mapAnswer) {
+        TestResultView testResult = new TestResultView();
+        testResult.setId(test.getId());
+        testResult.setMapAnswer(mapAnswer);
+        testResult.setResult(test.getResult());
+        return testResult;
     }
 
     private List<QuestionView> questionToQuestionView(List<Question> questions) {
@@ -114,5 +140,13 @@ public class QuestionServiceImpl implements QuestionService {
             questionViewList.add(questionView);
         }
         return questionViewList;
+    }
+
+    private List<Question> idToListQuestion(List<Integer> listQuestionId){
+        List<Question> listQuestion = new ArrayList<>();
+        for(Integer i :listQuestionId){
+            listQuestion.add(dao.getById(i));
+        }
+        return listQuestion;
     }
 }

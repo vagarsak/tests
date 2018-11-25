@@ -3,8 +3,11 @@ package ru.company.shared;
 import java.util.Map;
 
 public class TestResultView {
-    private Integer id; // ид теста
+
+    private Integer id;
+
     private Map<Integer, Boolean> mapAnswer;
+
     private Boolean result;
 
     public Integer getId() {

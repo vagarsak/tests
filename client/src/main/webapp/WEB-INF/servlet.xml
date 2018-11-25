@@ -32,11 +32,6 @@
         <property name="password" value="" />
     </bean>
 
-    <jdbc:initialize-database data-source="dataSource" ignore-failures="DROPS">
-        <jdbc:script location="classpath:ru/company/schema.sql" />
-        <jdbc:script location="classpath:ru/company/data.sql" />
-    </jdbc:initialize-database>
-
     <bean id="entityManagerFactory"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
         <property name="packagesToScan" value="ru.company.server.model" />

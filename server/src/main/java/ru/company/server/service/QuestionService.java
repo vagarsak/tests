@@ -50,4 +50,12 @@ public interface QuestionService {
      */
     TestResultView getTestAnswer(AnswerTestView answerTest);
 
+    /**
+     * Получить список результатов Tests
+     *
+     * @param user, role
+     * @return List
+     */
+    List<TestResultsView> getAllResultsTests(String user, String role);
+
 }

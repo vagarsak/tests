@@ -1,5 +1,7 @@
 package ru.company.server.model;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -12,15 +14,23 @@ public class Test {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "listQuestion")
-    @ElementCollection(targetClass = Question.class, fetch = FetchType.LAZY)
-    private List<Question> listQuestion;
+    @Column(name = "nameUser")
+    private String nameUser;
+
+    @Column(name = "listQuestionId")
+    @ElementCollection
+    private List<Integer> listQuestionId;
+
+    @Column(name = "result")
+    private Boolean result;
 
     public Test() {
     }
 
-    public Test(List<Question> listQuestion) {
-        this.listQuestion = listQuestion;
+    public Test(List<Integer> listQuestionId) {
+        this.listQuestionId = listQuestionId;
+        this.nameUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        this.result = null;
     }
 
     public Integer getId() {
@@ -31,11 +41,27 @@ public class Test {
         this.id = id;
     }
 
-    public List<Question> getListQuestion() {
-        return listQuestion;
+    public String getNameUser() {
+        return nameUser;
     }
 
-    public void setListQuestion(List<Question> listQuestion) {
-        this.listQuestion = listQuestion;
+    public void setNameUser(String nameUser) {
+        this.nameUser = nameUser;
+    }
+
+    public List<Integer> getListQuestionId() {
+        return listQuestionId;
+    }
+
+    public void setListQuestionId(List<Integer> listQuestionId) {
+        this.listQuestionId = listQuestionId;
+    }
+
+    public Boolean getResult() {
+        return result;
+    }
+
+    public void setResult(Boolean result) {
+        this.result = result;
     }
 }
