@@ -21,7 +21,7 @@ public class Question {
     @ElementCollection(targetClass = String.class)
     private List<String> answer;
 
-    @Column(name = "choicesAnswer")
+    @Column(name = "choices_answer")
     @ElementCollection(targetClass = String.class)
     private List<String> choicesAnswer;
 

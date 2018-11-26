@@ -19,10 +19,23 @@ CREATE TABLE IF NOT EXISTS question_answer (
     FOREIGN KEY (question_id) REFERENCES question (id)
 );
 
-CREATE TABLE IF NOT EXISTS question_choices_answer (
+
+CREATE TABLE IF NOT EXISTS question_choicesanswer (
     question_id             INTEGER NOT NULL ,
     choices_answer varchar(255),
     FOREIGN KEY (question_id) REFERENCES question (id)
+);
+
+CREATE TABLE IF NOT EXISTS test (
+    id             INTEGER PRIMARY KEY AUTO_INCREMENT,
+    nameUser       varchar,
+	result 	   boolean
+);
+
+CREATE TABLE IF NOT EXISTS test_listQuestionId (
+    test_id             INTEGER NOT NULL ,
+    listQuestionId varchar(255),
+    FOREIGN KEY (test_id) REFERENCES test (id)
 );
 
 create table IF NOT EXISTS users(
