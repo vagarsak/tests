@@ -2,6 +2,7 @@ package ru.company.server.dao;
 
 import ru.company.server.model.Question;
 import ru.company.server.model.Test;
+import ru.company.server.model.User;
 
 import java.util.List;
 
@@ -13,6 +14,21 @@ public interface QuestionDao {
      * @return List
      */
     List<Question> all();
+
+    /**
+     * Получить все объекты User
+     *
+     * @return List
+     */
+    List<User> allUser();
+
+    /**
+     * Получить все Question правильно отвечанных
+     *
+     * @param username
+     * @return List
+     */
+    List<String> getAllQuestionSuccess(String username);
 
     /**
      * Сохранить Question

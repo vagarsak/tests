@@ -14,6 +14,21 @@ public interface QuestionService {
     List<QuestionView> getQuestions();
 
     /**
+     * Получить список User
+     *
+     * @return List
+     */
+    List<UserView> getAllUser();
+
+    /**
+     * Получить список правильно отвечанных вопросов
+     *
+     * @param username
+     * @return List
+     */
+    List<String> getAllQuestionSuccess(String username);
+
+    /**
      * Проверить ответ Question
      *
      * @param answer

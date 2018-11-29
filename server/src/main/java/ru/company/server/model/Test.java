@@ -3,7 +3,7 @@ package ru.company.server.model;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "test")
@@ -17,9 +17,10 @@ public class Test {
     @Column(name = "nameUser")
     private String nameUser;
 
-    @Column(name = "listQuestionId")
-    @ElementCollection
-    private List<Integer> listQuestionId;
+    @ElementCollection(targetClass = ResultTest.class)
+    @MapKeyColumn(name="key") // column name for map "key"
+    @Column(name="value") // column name for map "value"
+    private Map<Integer, ResultTest> listQuestionAnswer;
 
     @Column(name = "result")
     private Boolean result;
@@ -27,8 +28,8 @@ public class Test {
     public Test() {
     }
 
-    public Test(List<Integer> listQuestionId) {
-        this.listQuestionId = listQuestionId;
+    public Test(Map<Integer, ResultTest> listQuestionAnswer) {
+        this.listQuestionAnswer = listQuestionAnswer;
         this.nameUser = SecurityContextHolder.getContext().getAuthentication().getName();
         this.result = null;
     }
@@ -49,12 +50,12 @@ public class Test {
         this.nameUser = nameUser;
     }
 
-    public List<Integer> getListQuestionId() {
-        return listQuestionId;
+    public Map<Integer, ResultTest> getListQuestionAnswer() {
+        return listQuestionAnswer;
     }
 
-    public void setListQuestionId(List<Integer> listQuestionId) {
-        this.listQuestionId = listQuestionId;
+    public void setListQuestionAnswer(Map<Integer, ResultTest> listQuestionAnswer) {
+        this.listQuestionAnswer = listQuestionAnswer;
     }
 
     public Boolean getResult() {

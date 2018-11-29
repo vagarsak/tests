@@ -27,6 +27,7 @@ public class RestyGwtApp implements EntryPoint {
     private final TabPanel tabPanel = new TabPanel();
 
     public void onModuleLoad() {
+        final UserView user_autentification = new UserView();
         Defaults.setServiceRoot(GWT.getHostPageBaseURL());
         RootPanel.get("center").add(codeLabel); // вспомогательная инфа
 
@@ -47,6 +48,9 @@ public class RestyGwtApp implements EntryPoint {
                 }
                 if(nameTabBar.equals(nameTabBar4)){
                     viewResultsTests.getAllResultsTests(); // обновляем результаты тестов
+                    if(user_autentification.getAuthorities().get(0).equals("ROLE_ADMIN") ){
+                        viewResultsTests.resultUser(); // запрос всех пользователей
+                    }
                 }
             }
         });
@@ -58,6 +62,7 @@ public class RestyGwtApp implements EntryPoint {
             }
             @Override
             public void onSuccess(Method method, UserView user) {
+                user_autentification.setAuthorities(user.getAuthorities());
                 for(int i =0; i< user.getAuthorities().size(); i++){
                     switch (user.getAuthorities().get(i)){
                         case "ROLE_USER":

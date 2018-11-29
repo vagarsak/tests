@@ -21,6 +21,14 @@ public interface AddQuestion extends RestService {
     @Path("/admin/all/question") // получить все вопросы
     public void getAllQuestion(MethodCallback<List<QuestionView>> callback);
 
+    @GET
+    @Path("/admin/all/user") // получить всех пользователей
+    public void getAllUser(MethodCallback<List<UserView>> callback);
+
+    @POST
+    @Path("/admin/all/question/user") // получить все успешные вопросы пользователя
+    public void getAllQuestionSuccess(String username, MethodCallback<List<String>> callback);
+
     @POST
     @Path("/admin/question")   // отправить ответ на вопрос
     public void sendAnswer(AnswerView s, MethodCallback<Boolean> callback);

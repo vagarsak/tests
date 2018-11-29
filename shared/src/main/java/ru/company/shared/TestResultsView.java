@@ -1,22 +1,23 @@
 package ru.company.shared;
 
 import java.util.List;
+import java.util.Map;
 
 public class TestResultsView {
     private Integer id;
 
     private Boolean result;
 
-    private List<String> question;
+    private Map<String, List<String>> questionAnswer;
 
     private String nameUser;
 
-    public List<String> getQuestion() {
-        return question;
+    public Map<String, List<String>> getQuestionAnswer() {
+        return questionAnswer;
     }
 
-    public void setQuestion(List<String> question) {
-        this.question = question;
+    public void setQuestionAnswer(Map<String, List<String>> questionAnswer) {
+        this.questionAnswer = questionAnswer;
     }
 
     public Integer getId() {

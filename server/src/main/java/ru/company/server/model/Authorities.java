@@ -5,6 +5,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "authorities")
 public class Authorities {
+
     @Id
     @Column(name = "authority")
     private String authority;

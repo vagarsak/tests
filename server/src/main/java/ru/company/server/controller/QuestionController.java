@@ -29,8 +29,18 @@ public class QuestionController {
     }
 
     @RequestMapping(value = "/admin/all/question", method = RequestMethod.GET)
-    public List<QuestionView> getAllQuestion() { // получить все вопросы
+    public List<QuestionView> getAllQuestion() {
         return questionService.getQuestions();
+    }
+
+    @RequestMapping(value = "/admin/all/user", method = RequestMethod.GET)
+    public List<UserView> getAllUser() { // получить всех пользователей
+        return questionService.getAllUser();
+    }
+
+    @RequestMapping(value = "/admin/all/question/user", method = RequestMethod.POST)
+    public List<String> getAllQuestionSuccess(@RequestBody String username) {
+        return questionService.getAllQuestionSuccess(username);
     }
 
     @RequestMapping(value = "/admin/question", method = RequestMethod.POST)

@@ -4,11 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.company.server.dao.QuestionDao;
-import ru.company.server.model.Question;
-import ru.company.server.model.Result;
-import ru.company.server.model.Test;
+import ru.company.server.model.*;
 import ru.company.shared.*;
 
+import javax.persistence.Index;
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +29,17 @@ public class QuestionServiceImpl implements QuestionService {
     public List<QuestionView> getQuestions() {
         List<Question> questions = dao.all();
         return questionToQuestionView(questions);
+    }
+
+    @Override
+    public List<UserView> getAllUser() {
+        List<User> users = dao.allUser();
+        return userToUserView(users);
+    }
+
+    @Override
+    public List<String> getAllQuestionSuccess(String username) {
+        return dao.getAllQuestionSuccess(username);
     }
 
     @Override
@@ -71,18 +82,23 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public TestResultView getTestAnswer(AnswerTestView answerTest) {
         Test test = dao.getByIdTest(answerTest.getId());
-        List<Question> listQuestion = idToListQuestion(test.getListQuestionId());
+        List<Question> listQuestion = idToListQuestion(test.getListQuestionAnswer());
         Map<Integer, Boolean> mapAnswer = new HashMap<>();
         test.setResult(true);
         for (int i = 0; i < listQuestion.size(); i++) {
             Question question = listQuestion.get(i);
-            mapAnswer.put(question.getId(), false);
-            if (answerTest.getMapAnswer().containsKey(question.getId())) {
-                if (question.checkAnswer(answerTest.getMapAnswer().get(question.getId()))) {
-                    mapAnswer.put(question.getId(), true);
+            Integer questionId = question.getId();
+            mapAnswer.put(questionId, false);
+            if (answerTest.getMapAnswer().containsKey(questionId)) {
+                if (question.checkAnswer(answerTest.getMapAnswer().get(questionId))) {
+                    mapAnswer.put(questionId, true);
+                    test.getListQuestionAnswer().get(questionId).setResult(true);
                 } else {
                     test.setResult(false);
+                    test.getListQuestionAnswer().get(questionId).setResult(false);
                 }
+                test.getListQuestionAnswer().get(questionId).setAnswer(answerTest.getMapAnswer().get(questionId));
+
             } else {
                 test.setResult(false);
             }
@@ -102,11 +118,12 @@ public class QuestionServiceImpl implements QuestionService {
             testResultsView.setId(test.getId());
             testResultsView.setResult(test.getResult());
             testResultsView.setNameUser(test.getNameUser());
-            List<String> questions = new ArrayList<>();
-            for(Question question :idToListQuestion(test.getListQuestionId())){
-                questions.add(question.getQuestion());
+            Map<String, List<String>> mapQuestionAnswer = new HashMap<>();
+            for(Question question :idToListQuestion(test.getListQuestionAnswer())){
+                mapQuestionAnswer.put(question.getQuestion()
+                        ,test.getListQuestionAnswer().get(question.getId()).getAnswer());
             }
-            testResultsView.setQuestion(questions);
+            testResultsView.setQuestionAnswer(mapQuestionAnswer);
             testResultsViewList.add(testResultsView);
         }
         return testResultsViewList;
@@ -116,7 +133,7 @@ public class QuestionServiceImpl implements QuestionService {
     private TestView testToTestView(Test test) {
         TestView testView = new TestView();
         testView.setId(test.getId());
-        testView.setListQuestion(questionToQuestionView(idToListQuestion(test.getListQuestionId())));
+        testView.setListQuestion(questionToQuestionView(idToListQuestion(test.getListQuestionAnswer())));
         return testView;
     }
 
@@ -142,11 +159,22 @@ public class QuestionServiceImpl implements QuestionService {
         return questionViewList;
     }
 
-    private List<Question> idToListQuestion(List<Integer> listQuestionId){
+    private List<Question> idToListQuestion(Map<Integer,ResultTest> listQuestionAnswer){
         List<Question> listQuestion = new ArrayList<>();
-        for(Integer i :listQuestionId){
+        for(Integer i : listQuestionAnswer.keySet()){
             listQuestion.add(dao.getById(i));
         }
         return listQuestion;
     }
+
+    private List<UserView> userToUserView(List<User> users){
+        List<UserView> userViews = new ArrayList<>();
+        for(User user : users){
+            UserView userView = new UserView();
+            userView.setName(user.getUsername());
+            userViews.add(userView);
+        }
+        return userViews;
+    }
+
 }

@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import ru.company.shared.ResultView;
+import ru.company.shared.UserView;
 
 import java.util.List;
 
